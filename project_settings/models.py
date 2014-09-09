@@ -16,6 +16,7 @@ class Setting(models.Model):
     name = models.CharField(max_length=150)
     value = models.CharField(max_length=2000)
     site = models.ForeignKey("sites.Site", editable=False,
+                             related_name='project_setting',
                              default=settings.SITE_ID)
 
     class Meta:

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 #
-from editable_settings.conf import AppSettings
 from django.conf import settings as django_settings
+from project_settings.conf import ProjectSettings
 
 
-conf = AppSettings('')
+conf = ProjectSettings('')
 
 
 def register_setting(name=None, label=None, editable=False, description=None,

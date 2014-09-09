@@ -4,5 +4,5 @@ from django.apps import AppConfig as AC
 class AppConfig(AC):
 
     name = 'project_settings'
-    label = 'project_settings'
+    label = 'Settings'
     verbose_name = 'Settings'

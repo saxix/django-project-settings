@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 import pytest
-from project_settings.conf import AppSettings, IntegerValue, StringValue, ListValue, BoolValue
+from project_settings.conf import ProjectSettings, IntegerValue, StringValue, ListValue, BoolValue
 
 
 @pytest.fixture
 @pytest.mark.django_db
 def sett():
-    class Sett(AppSettings):
+    class Sett(ProjectSettings):
         defaults = {
             'INT1': IntegerValue(11),
             'INT2': 22,
@@ -24,7 +24,7 @@ def sett():
 
 @pytest.fixture
 def django_sett():
-    class Sett(AppSettings):
+    class Sett(ProjectSettings):
         defaults = {
             'DEBUG': False,
             'SESSION_EXPIRE_AT_BROWSER_CLOSE': BoolValue(True, True),

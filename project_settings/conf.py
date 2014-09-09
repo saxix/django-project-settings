@@ -1,6 +1,6 @@
 import six
 from datetime import datetime, date
-from django.forms import NumberInput, TextInput, DateInput, CheckboxInput
+from django.forms import NumberInput, TextInput, DateInput, CheckboxInput, PasswordInput
 from django.test.signals import setting_changed
 from .models import Setting
 from django.conf import settings as django_settings
@@ -48,6 +48,11 @@ class StringValue(Value):
     func = unicode
 
 
+class PasswordValue(Value):
+    widget = PasswordInput
+    func = unicode
+
+
 class TextValue(Value):
     widget = TextInput
     func = unicode
@@ -69,10 +74,10 @@ class BoolValue(Value):
 
 
 default_mapping = (((bool,), BoolValue),
-           ((list, tuple), ListValue),
-           ((six.string_types,), StringValue),
-           ((datetime, date), DateValue),
-           ((int, long), IntegerValue),
+                   ((list, tuple), ListValue),
+                   ((six.string_types,), StringValue),
+                   ((datetime, date), DateValue),
+                   ((int, long), IntegerValue),
 )
 
 
@@ -95,7 +100,7 @@ class SettingsBase(type):
         return super_new(cls, name, bases, attrs)
 
 
-class AppSettings(six.with_metaclass(SettingsBase)):
+class ProjectSettings(six.with_metaclass(SettingsBase)):
     """
     Class to manage application related settings
     How to use:
@@ -103,7 +108,7 @@ class AppSettings(six.with_metaclass(SettingsBase)):
     >>> from django.conf import settings
     >>> settings.APP_OVERRIDE = 'overridden'
     >>> settings.MYAPP_CALLBACK = 100
-    >>> class MySettings(AppSettings):
+    >>> class MySettings(ProjectSettings):
     ...     defaults = {'ENTRY1': 'abc', 'ENTRY2': 123, 'OVERRIDE': None, 'CALLBACK':10}
     ...     def set_CALLBACK(self, value):
     ...         setattr(self, 'CALLBACK', value*2)
@@ -133,7 +138,7 @@ class AppSettings(six.with_metaclass(SettingsBase)):
         from django.conf import settings
 
         for name, default in six.iteritems(self.defaults):
-            full_name= self.get_full_name(name)
+            full_name = self.get_full_name(name)
             value = getattr(settings, full_name, default)
             self._set_attr(full_name, value)
         setting_changed.connect(self._handler)
