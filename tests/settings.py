@@ -1,4 +1,4 @@
-SECRET_KEY='1111'
+SECRET_KEY = '1111'
 TIME_ZONE = 'Europe/Rome'
 USE_TZ = True
 DEBUG = False
@@ -64,7 +64,6 @@ MIDDLEWARE_CLASSES = (
     # "django.contrib.messages.middleware.MessageMiddleware",
 )
 
-
-TEST_INT=1
-TEST_CHAR='a'
-TEST_BOOL=False
+TEST_INT = 1
+TEST_CHAR = 'a'
+TEST_BOOL = False

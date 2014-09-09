@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import os
 import codecs
-from distutils.config import PyPIRCCommand
 from setuptools import setup, find_packages
 
 dirname = 'project_settings'

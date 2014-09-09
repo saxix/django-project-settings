@@ -18,7 +18,6 @@ def sett():
             'EDITABLE': IntegerValue(11, True)
         }
 
-
     return Sett('TEST')
 
 
@@ -33,6 +32,4 @@ def django_sett():
             'EDITABLE': IntegerValue(11, True)
         }
 
-
     return Sett('')
-

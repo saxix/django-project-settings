@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.test.utils import override_settings
 from project_settings.models import Setting
-from .fixtures import *
+from .fixtures import *  # noqa
 
 
 def test_default(sett):
