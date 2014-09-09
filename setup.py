@@ -17,6 +17,7 @@ def read(*parts):
 setup(
     name=app.NAME,
     version=app.get_version(),
+    description='Store django settings into Database',
     long_description=read("README"),
     packages=find_packages('.'),
     include_package_data=True,
