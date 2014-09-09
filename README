@@ -1,0 +1,10 @@
+Django Project Settings
+=======================
+
+Store django settings into Database
+
+Quick Installation
+------------------
+
+   pip install django-project-settings
+
