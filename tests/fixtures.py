@@ -10,6 +10,7 @@ def clear_cache(*a, **kw):
     settings._editable_cache={}
     settings._loaded=False
 
+setting_changed.connect(clear_cache)
 
 @pytest.fixture
 @pytest.mark.django_db
@@ -32,7 +33,6 @@ def sett():
 
 @pytest.fixture
 def django_sett():
-    setting_changed.connect(clear_cache)
 
     class Sett(ProjectSettings):
         defaults = {
