@@ -6,4 +6,8 @@ def pytest_configure(config):
 
     if not settings.configured:
         os.environ['DJANGO_SETTINGS_MODULE'] = 'tests.settings'
-    # django.setup()
+    import django
+    try:
+        django.setup()
+    except:
+        pass

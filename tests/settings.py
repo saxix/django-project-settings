@@ -63,7 +63,7 @@ MIDDLEWARE_CLASSES = (
     # "django.middleware.csrf.CsrfViewMiddleware",
     # "django.contrib.messages.middleware.MessageMiddleware",
 )
-
-TEST_INT = 1
-TEST_CHAR = 'a'
-TEST_BOOL = False
+#
+# TEST_INT = 1
+# TEST_CHAR = 'a'
+# TEST_BOOL = False

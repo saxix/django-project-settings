@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
-from django.conf import settings
-
+from django.conf import settings as django_settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
@@ -17,7 +16,7 @@ class Setting(models.Model):
     value = models.CharField(max_length=2000)
     site = models.ForeignKey("sites.Site", editable=False,
                              related_name='project_setting',
-                             default=settings.SITE_ID)
+                             default=django_settings.SITE_ID)
 
     class Meta:
         verbose_name = _("Setting")
@@ -33,5 +32,9 @@ class Setting(models.Model):
         to ``True``.
         """
         if update_site or not self.id:
-            self.site_id = settings.SITE_ID
+            self.site_id = django_settings.SITE_ID
         super(Setting, self).save(*args, **kwargs)
+        from .conf import settings
+        settings._loaded = False
+        settings._editable_cache[self.name] = self.value
+
