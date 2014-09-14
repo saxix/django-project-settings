@@ -12,7 +12,7 @@ class Setting(models.Model):
     """
 
     prefix = models.CharField(max_length=50)
-    name = models.CharField(max_length=150)
+    name = models.CharField(max_length=150, unique=True)
     value = models.CharField(max_length=2000)
     site = models.ForeignKey("sites.Site", editable=False,
                              related_name='project_setting',

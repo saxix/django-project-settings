@@ -1,14 +1,11 @@
 from __future__ import unicode_literals
 import six
-from .values import default_mapping, Value, get_descriptor
 from _warnings import warn
-from django.conf import settings as django_settings
-from django.test.signals import setting_changed
 from django.utils.encoding import python_2_unicode_compatible
-from functools import partial
-
+from django.conf import settings as django_settings
 from project_settings.registry import registry
-from project_settings.utils import register_setting
+from project_settings.values import default_mapping, get_descriptor
+# from mezzanine.conf import register_setting
 
 
 @python_2_unicode_compatible
@@ -60,7 +57,7 @@ class Settings(object):
         access. If the conf app is not installed then set the loaded
         flag to ``True`` in order to bypass DB lookup entirely.
         """
-        self._loaded = __name__ not in getattr(self, "INSTALLED_APPS")
+        self._loaded = 'project_settings' not in getattr(self, "INSTALLED_APPS")
         self._editable_cache = {}
 
     def _load(self):
@@ -74,7 +71,6 @@ class Settings(object):
         removed_settings = []
         conflicting_settings = []
         for setting_obj in Setting.objects.all():
-
             try:
                 registry[setting_obj.name]
             except KeyError:
@@ -140,6 +136,8 @@ class Settings(object):
         except KeyError:
             return getattr(django_settings, name, setting["default"])
 
+    def register(self, *args, **kwargs):
+        return register_settings(*args, **kwargs)
 
 settings = Settings()
 
@@ -190,4 +188,37 @@ class ProjectSettings(six.with_metaclass(SettingsBase)):
         if item in self.defaults:
             return getattr(settings, fullname)
 
+
+
+
+def register_setting(name=None, default=None, editable=False, descriptor=None,
+                     label=None, description=None, prefix=None, choices=None):
+    from project_settings.models import Setting
+
+    if name is None:
+        raise TypeError("project_settings.conf.register_setting requires the "
+                        "'name' keyword argument.")
+    if editable and default is None:
+        raise TypeError("Cannot register `%s`: project_settings.conf.register_setting requires the "
+                        "'default' keyword argument when 'editable' is True.", name)
+
+    if hasattr(django_settings, name):
+        editable = False
+        default = getattr(django_settings, name)
+        warn("`{}` cannot be edited as same setting is present in settings.py".format(name))
+
+    if label is None:
+        label = name.replace("_", " ").title()
+    if descriptor is None:
+        descriptor = get_descriptor(default)
+    else:
+        descriptor = descriptor(default)
+
+    # if editable:
+    #     Setting.objects.get_or_create(name=name,
+    #                                   defaults={'value':default}, prefix=prefix or '')
+    #
+    registry[name] = {"name": name, "label": label, "editable": editable,
+                      "description": description, "default": default,
+                      "choices": choices, "descriptor": descriptor}
 
