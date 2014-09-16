@@ -1,6 +1,4 @@
 from __future__ import unicode_literals
-from future.builtins import int
-
 from collections import defaultdict
 
 from django import forms
@@ -8,8 +6,6 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 from django.template.defaultfilters import urlize
 
-# from mezzanine.conf import settings, registry
-# from mezzanine.conf.models import Setting
 from project_settings.models import Setting
 from project_settings.registry import registry
 from project_settings.conf import settings
