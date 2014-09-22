@@ -147,14 +147,11 @@ class SettingsBase(type):
     def __new__(cls, name, bases, attrs):
         super_new = super(SettingsBase, cls).__new__
         attrs['_meta'] = meta = Options()
-        #
-        for k, v in attrs['defaults'].items():
-            descriptor = get_descriptor(v)
-            descriptor.name = k
-            meta.descriptors[k] = descriptor
-        #     attrs['defaults'][k] = descriptor.default
-            #
-            # attrs[k] = v
+        if 'defaults' in attrs:
+            for k, v in attrs['defaults'].items():
+                descriptor = get_descriptor(v)
+                descriptor.name = k
+                meta.descriptors[k] = descriptor
         return super_new(cls, name, bases, attrs)
 
 
