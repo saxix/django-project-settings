@@ -35,7 +35,7 @@ class Settings(object):
     of access for all settings.
     """
 
-    def __init__(self):
+    def __init__(self, prefix=""):
         """
         The ``_loaded`` attribute is a flag for defining whether
         editable settings have been loaded from the database. It
@@ -48,6 +48,10 @@ class Settings(object):
         time an editable setting is accessed.
         """
         self._loaded = True
+        if prefix:
+            self._prefix = '%s_' % prefix
+        else:
+            self._prefix = ""
         self._editable_cache = {}
 
     def use_editable(self):
@@ -81,6 +85,7 @@ class Settings(object):
 
             # Convert DB value to correct type.
             descriptor = registry[setting_obj.name]["descriptor"]
+            force_editable = registry[setting_obj.name]["force_editable"]
             # type_fn = self.TYPE_FUNCTIONS.get(setting_type, setting_type)
             type_fn = descriptor.formfield.to_python
             try:
@@ -94,13 +99,16 @@ class Settings(object):
             # Only use DB setting if it's not defined in settings.py
             # module, in which case add it to conflicting list for
             # warning.
-            try:
-                getattr(django_settings, setting_obj.name)
-            except AttributeError:
+            if force_editable:
                 self._editable_cache[setting_obj.name] = setting_value
             else:
-                if setting_value != registry[setting_obj.name]["default"]:
-                    conflicting_settings.append(setting_obj.name)
+                try:
+                    getattr(django_settings, setting_obj.name)
+                except AttributeError:
+                    self._editable_cache[setting_obj.name] = setting_value
+                else:
+                    if setting_value != registry[setting_obj.name]["default"]:
+                        conflicting_settings.append(setting_obj.name)
 
         if removed_settings:
             Setting.objects.filter(name__in=removed_settings).delete()
@@ -115,7 +123,7 @@ class Settings(object):
             yield (entry, getattr(self, entry))
 
     def __getattr__(self, name):
-
+        name = "{}{}".format(self._prefix, name)
         # Lookup name as a registered setting or a Django setting.
         try:
             setting = registry[name]
@@ -136,49 +144,21 @@ class Settings(object):
         except KeyError:
             return getattr(django_settings, name, setting["default"])
 
-    def register(self, *args, **kwargs):
-        return register_settings(*args, **kwargs)
-
 settings = Settings()
 
 
-
-class SettingsBase(type):
-    def __new__(cls, name, bases, attrs):
-        super_new = super(SettingsBase, cls).__new__
-        attrs['_meta'] = meta = Options()
-        if 'defaults' in attrs:
-            for k, v in attrs['defaults'].items():
-                descriptor = get_descriptor(v)
-                descriptor.name = k
-                meta.descriptors[k] = descriptor
-        return super_new(cls, name, bases, attrs)
+class ProjectSettings(Settings):
 
 
-class ProjectSettings(six.with_metaclass(SettingsBase)):
+    def __init__(self, prefix=""):
+        self._registry = {}
+        super(ProjectSettings, self).__init__(prefix)
 
-    defaults = {}
+    def register(self, *args, **kwargs):
 
-    def __init__(self, prefix):
-        """
-        Loads our settings from django.conf.settings, applying defaults for any
-        that are omitted.
-        """
-
-        self.prefix = prefix
-        for name, default in six.iteritems(self.defaults):
-            fullname = "{}_{}".format(self.prefix, name)
-            descriptor = self._meta.descriptors[name]
-
-            register_setting(name=fullname,
-                             default=descriptor.default,
-                             choices=descriptor.choices,
-                             prefix=descriptor.prefix,
-                             description=descriptor.description,
-                             editable=descriptor.editable,
-                             label=descriptor.label,
-                             descriptor=descriptor
-            )
+        # kwargs['name'] = self._prefix + '_' + kwargs['name']
+        kwargs['registry'] = self._registry
+        return register_setting(*args, **kwargs)
 
     def __getattr__(self, item):
         fullname= "{}_{}".format(self.prefix, item)
@@ -189,18 +169,22 @@ class ProjectSettings(six.with_metaclass(SettingsBase)):
 
 
 def register_setting(name=None, default=None, editable=False, descriptor=None,
-                     label=None, description=None, prefix=None, choices=None):
-    from project_settings.models import Setting
+                     label=None, description=None, prefix=None,
+                     force_editable=False,
+                     choices=None,
+                     registry=registry):
 
     if name is None:
         raise TypeError("project_settings.conf.register_setting requires the "
                         "'name' keyword argument.")
+    if force_editable:
+        editable = True
     if editable and default is None:
         raise TypeError("Cannot register `%s`: project_settings.conf.register_setting requires the "
                         "'default' keyword argument when 'editable' is True.", name)
 
     if hasattr(django_settings, name):
-        editable = False
+        # editable = False
         default = getattr(django_settings, name)
         warn("`{}` cannot be edited as same setting is present in settings.py".format(name))
 
@@ -216,6 +200,7 @@ def register_setting(name=None, default=None, editable=False, descriptor=None,
     #                                   defaults={'value':default}, prefix=prefix or '')
     #
     registry[name] = {"name": name, "label": label, "editable": editable,
+                      "force_editable": force_editable,
                       "description": description, "default": default,
                       "choices": choices, "descriptor": descriptor}
 

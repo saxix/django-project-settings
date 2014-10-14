@@ -3,7 +3,7 @@ import datetime
 import os
 
 NAME = 'django-project-settings'
-VERSION = __version__ = (0, 1, 0, 'alpha', 0)
+VERSION = __version__ = (0, 1, 0, 'final', 0)
 __author__ = 'sax'
 default_app_config = 'project_settings.apps.AppConfig'
 

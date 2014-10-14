@@ -67,3 +67,6 @@ MIDDLEWARE_CLASSES = (
 # TEST_INT = 1
 # TEST_CHAR = 'a'
 # TEST_BOOL = False
+SOUTH_MIGRATION_MODULES = {
+        'project_settings': 'project_settings.south_migrations',
+}
